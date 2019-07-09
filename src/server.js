@@ -1,4 +1,14 @@
-const express = require('express')
-const app = express()
+const app = require("express")();
+const bodyParser = require("body-parser");
 
-app.listen(process.env.SERVER_PORT, () => console.log(`Server listening on ${process.env.SERVER_PORT}`))
+// Express middleware
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
+// Route middlewares
+const authRoute = require("./routes/auth");
+app.use("/auth", authRoute);
+
+app.listen(process.env.SERVER_PORT, () =>
+  console.log(`Server listening on ${process.env.SERVER_PORT}`)
+);
