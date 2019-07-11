@@ -1,6 +1,7 @@
 const app = require("express").Router();
 const User = require("../model/User");
-const bcrypt = require("bcrypt");
+
+const { encryptPassword } = require("../util");
 const { registerValidaion } = require("../validations/user");
 
 app.get("/", async (req, res) => {
@@ -16,21 +17,20 @@ app.get("/:id", async (req, res) => {
   let id = req.params.id;
 
   try {
-    let result = await User.findOne({ _id: id });
+    let result = await User.findById(id);
     res.status(200).send(result);
   } catch (error) {
     res.status(400).send(error);
   }
 });
 
-app.post("/register", async (req, res) => {
-  // Cryptography password
-  let hashedPassowd = bcrypt.hashSync(req.body.password, 10);
+app.get("/login", async (req, res) => {});
 
+app.post("/register", async (req, res) => {
   let user = new User({
     name: req.body.name,
     email: req.body.email,
-    password: hashedPassowd
+    password: encryptPassword(req.body.password)
   });
 
   // Validations
@@ -51,9 +51,25 @@ app.post("/register", async (req, res) => {
 
 app.delete("/:id", (req, res) => {
   User.deleteOne({ _id: req.params.id }, err => {
-    if (err) res.status(400).send(error);
+    if (err) res.status(400).send(err);
     res.status(200).send("User removed successfully");
   });
+});
+
+app.put("/:id", async (req, res) => {
+  try {
+    let updatedUser = await User.updateOne(
+      { _id: req.params.id },
+      {
+        password: encryptPassword(req.body.password),
+        name: req.body.name,
+        email: req.body.email
+      }
+    );
+    res.status(200).send(updatedUser);
+  } catch (error) {
+    res.status(400).send(error);
+  }
 });
 
 module.exports = app;
