@@ -1,5 +1,6 @@
 const app = require("express").Router();
 const User = require("../model/User");
+const jwt = require("jsonwebtoken");
 
 const { encryptPassword, decryptPassword } = require("../util");
 const { registerValidaion } = require("../validations/user");
@@ -25,12 +26,13 @@ app.get("/:id", async (req, res) => {
 });
 
 app.post("/login", async (req, res) => {
-  let user = await User.findOne({email: req.body.email})
-  if(user){
-    if(decryptPassword(req.body.password, user.password)) res.status(200).send("User successfully logged")
-    else res.status(400).send("Incorrect password")
-  } else res.status(400).send("Email not found")
-  
+  let user = await User.findOne({ email: req.body.email });
+  if (user) {
+    let token = jwt.sign({ id: user._id }, process.env.JWT_TOKEN);
+    if (decryptPassword(req.body.password, user.password))
+      res.status(200).send(token);
+    else res.status(400).send("Incorrect password");
+  } else res.status(400).send("Email not found");
 });
 
 app.post("/register", async (req, res) => {
