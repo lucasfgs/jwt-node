@@ -28,7 +28,7 @@ app.get("/:id", async (req, res) => {
 app.post("/login", async (req, res) => {
   let user = await User.findOne({ email: req.body.email });
   if (user) {
-    let token = jwt.sign({ id: user._id }, process.env.JWT_TOKEN);
+    let token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
     if (decryptPassword(req.body.password, user.password))
       res.status(200).send(token);
     else res.status(400).send("Incorrect password");
