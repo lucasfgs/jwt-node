@@ -1,7 +1,7 @@
 const app = require("express").Router();
 const User = require("../model/User");
 
-const { encryptPassword } = require("../util");
+const { encryptPassword, decryptPassword } = require("../util");
 const { registerValidaion } = require("../validations/user");
 
 app.get("/", async (req, res) => {
@@ -20,11 +20,18 @@ app.get("/:id", async (req, res) => {
     let result = await User.findById(id);
     res.status(200).send(result);
   } catch (error) {
-    res.status(400).send(error);
+    res.status(400).send(error.message);
   }
 });
 
-app.get("/login", async (req, res) => {});
+app.post("/login", async (req, res) => {
+  let user = await User.findOne({email: req.body.email})
+  if(user){
+    if(decryptPassword(req.body.password, user.password)) res.status(200).send("User successfully logged")
+    else res.status(400).send("Incorrect password")
+  } else res.status(400).send("Email not found")
+  
+});
 
 app.post("/register", async (req, res) => {
   let user = new User({
