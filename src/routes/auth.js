@@ -30,9 +30,19 @@ app.post("/login", async (req, res) => {
   if (user) {
     let token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
     if (decryptPassword(req.body.password, user.password))
-      res.status(200).send(token);
-    else res.status(400).send("Incorrect password");
-  } else res.status(400).send("Email not found");
+      res.status(200).json({ token, user_id: user._id });
+    else
+      res.status(400).json({
+        error: {
+          message: "Incorrect password"
+        }
+      });
+  } else
+    res.status(400).json({
+      error: {
+        message: "E-mail not found"
+      }
+    });
 });
 
 app.post("/register", async (req, res) => {

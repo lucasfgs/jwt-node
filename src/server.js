@@ -1,9 +1,11 @@
 const app = require("express")();
 const bodyParser = require("body-parser");
+const cors = require('cors')
 
 // Express middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(cors())
 
 // Route middlewares
 const authRoute = require("./routes/auth");
